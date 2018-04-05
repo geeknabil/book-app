@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home | Register
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}?q=10">
+{% endblock %}
+
+{% block body %}
+    <nav>
+        <a href="{{ url_for('index') }}"><button class="btn btn-light home-btn">Home</button></a>
+        <a href="{{ url_for('login') }}"><button class="btn btn-light login-btn">Login</button></a>
+        <a href="{{ url_for('index') }}"><button class="btn btn-light register-btn">Register</button></a>
+    </nav>
+    <div class="container">
+        <header>
+            <h1>Read-book</h1>
+            <h3>This is a Book Review Site!</h2>
+        </header>
+        <br>
+        <section>
+            <p>It's free, <span class="bold-text">Create Account</span> to Search, Read and See Reviews ....</p>
+            <form action="{{ url_for('login') }}" method="post">
+                <input class="form-control" type="text" placeholder="Username" name="username" required>
+                <br>
+                <input class="form-control" type="email" placeholder="Email" name="email" required>
+                <br>
+                <input class="form-control" type="password" placeholder="Password" name="password" required>
+                <br>
+                <button class="btn btn-primary">Register</button>
+            </form>
+        </section>
+    </div>
+{% endblock %}

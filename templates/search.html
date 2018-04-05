@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}?q=5">
+{% endblock %}
+
+
+{% block body %}
+    <div class="container">
+        <form action="{{ url_for('list_books') }}" method="post">
+            <div class="form-group">
+                <input class="form-control" type="text" placeholder="Search with isbn, title or even author" name="search" required>
+                <button class="btn">Search</button>
+            </div>
+        </form>
+
+        <div>
+            <ul>
+                {% for book in books %}
+                    <li>{{ book }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

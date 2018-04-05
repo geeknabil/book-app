@@ -1,0 +1,30 @@
+nav {
+  height: 40px;
+  background-color: silver;
+}
+
+nav a {
+    color: black;
+}
+
+.home-btn {
+  margin-left: 50px; }
+
+.register-btn, .login-btn {
+  float: right;
+  margin-right: 30px; }
+
+header {
+  text-align: center;
+  margin-top: 20px; }
+
+section {
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 50px;
+  text-align: center; }
+
+.bold-text {
+  font-weight: bold; }
+
+/*# sourceMappingURL=styles.css.map */
