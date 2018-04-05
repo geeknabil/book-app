@@ -1,18 +1,4 @@
-nav {
-  height: 40px;
-  background-color: silver;
-}
 
-nav a {
-    color: black;
-}
-
-.home-btn {
-  margin-left: 50px; }
-
-.register-btn, .login-btn {
-  float: right;
-  margin-right: 30px; }
 
 header {
   text-align: center;
@@ -27,4 +13,17 @@ section {
 .bold-text {
   font-weight: bold; }
 
+.big-text {
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin: 50px;
+  margin-top: 50px;
+}
+
+button {
+  text-align: center;
+  margin: 70px;
+  margin-bottom: 20px;
+}
 /*# sourceMappingURL=styles.css.map */

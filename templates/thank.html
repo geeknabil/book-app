@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Error
+    Success
 {% endblock %}
 
 {% block style %}
+    <meta http-equiv="refresh" content="2; url={{ url_for('search') }}" />
     <style>
         body {
             text-align: center;
@@ -12,8 +13,7 @@
     </style>
 {% endblock %}
 
-
 {% block body %}
-    <h3>{{error}}</h3>
-    <h5><a href="{{ url_for('index') }}">Click here to register.</a></h5>
+    <h3>{{mess}}</h3>
 {% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Success
+{% endblock %}
+
+{% block style %}
+    <meta http-equiv="refresh" content="2; url={{ url_for('login') }}" />
+    <style>
+        body {
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h3>{{mess}}</h3>
+{% endblock %}
+

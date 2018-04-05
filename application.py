@@ -25,47 +25,62 @@ db = scoped_session(sessionmaker(bind=engine))
 def index():
     return render_template("index.html")
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    # if submitting the form take username, email and password and insert them into db
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    # if submitting the form
     if request.method == "POST":
+        # get user input
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
+        print(username)
+        print(email)
+        print(password)
+        # make sure user not exist and if so insert it to db
+        user = db.execute("SELECT email FROM users WHERE email = :email",
+        {"email": email}).fetchone()
+        if user is None:
+            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
+            {"username": username, "email": email, "password": password})
+            db.commit()
+        # if exist return error mess
+        else:
+            return render_template("register.html", mess="Error, the user with this email already exist!")
 
-        db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
-        {"username": username, "email": email, "password": password})
+        # if not exist render login page
+        return render_template("success.html", mess="You have successfully registered!")
 
-        db.commit()
-        return render_template("login.html", mess="You have successfully registered!")
+    # in case clicking register button
+    return render_template("register.html")
 
-    # in case user try to login with login button (get request)
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # make sure user logged in correctly
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        user = db.execute("SELECT id, email, password FROM users WHERE email = :email AND password = :password",
+        {"email": email, "password": password}).fetchone()
+
+        if user is None:
+            return render_template("login.html", mess="Error, either username or password not correct if you didn't registered try to register instead", again="again")
+
+        # store user id inside a session variable
+        session["user_id"] = user.id
+        return render_template("thank.html", mess="Thanks for logging in!")
+
     return render_template("login.html")
 
-@app.route("/search", methods=["POST"])
+@app.route("/search", methods=["GET", "POST"])
 def search():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    # render books that user asked
+    if request.method == "POST":
+        book_query = request.form.get("search")
+        books = db.execute("SELECT * FROM books WHERE isbn = :book_query OR title = :book_query OR author = :book_query",
+        {"book_query": book_query})
 
-    user = db.execute("SELECT id, username, password FROM users WHERE username = :username AND password = :password",
-    {"username": username, "password": password}).fetchone()
-
-    if user is None:
-        return render_template("error.html", error="Error, No user found try to register instead!", back="register")
-    # elif username != user.username or password != user.password:
-    #     return render_template("error.html", error="Error, username or password not correct!", back="login")
-
-    session["user_id"] = user.id
-    print(session["user_id"])
+        return render_template("search.html", books=books)
 
     return render_template("search.html")
 
-
-@app.route("/search", methods=["POST"])
-def list_books():
-    book_query = request.form.get("search")
-    books = db.execute("SELECT * FROM books WHERE isbn = :book_query OR title = :book_query OR author = :book_query",
-    {"book_query": book_query})
-
-    return render_template("search.html", books=books)
 
