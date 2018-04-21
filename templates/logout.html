@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Search
+    Logout
 {% endblock %}
 
 {% block style %}
@@ -12,8 +12,7 @@
 {% block body %}
     <nav>
         <a href="{{ url_for('index') }}"><button class="btn btn-light home-btn">Home</button></a>
-        <a href="{{ url_for('index') }}"><button class="btn btn-light logout-btn">Logout</button></a>
-        <a class="username" href="{{ url_for('index') }}">{{username}}</a>
+        <a href="{{ url_for('login') }}"><button class="btn btn-light logout-btn">Login</button></a>
     </nav>
     <div class="container">
         <header>
@@ -35,7 +34,7 @@
                     <h4 class="text-danger text-center">No matching result!</h4>
                 {% else %}
                     {% for book in books %}
-                        <li><a href="{{ url_for('book', book_id=book.id) }}">{{book.isbn}}, {{book.title}}, {{ book.author }}.</a></li>
+                        <li><a href="{{ url_for('book', book_id=book[0]) }}">{{book[1]}}, {{book[2]}}, {{ book[3] }}.</a></li>
                     {% endfor %}
                 {% endif %}
             </ul>

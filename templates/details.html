@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Details
+{% endblock %}
+
+{% block style %}
+    <style>
+        body {
+            padding: 50px;
+        }
+
+        li {
+            font-size: 20px;
+        }
+
+        button {
+            margin-left: 20px;
+        }
+
+    </style>
+{% endblock %}
+
+
+{% block body %}
+
+    <h1>Details:</h1>
+    <br>
+    {% if no_book %}
+        <li>No details about this book!</li>
+    {% else %}
+        <ul>
+            <li>Title: {{book.title}}</li>
+            <li>Author: {{book.author}}</li>
+            <li>Year: {{book.year}}</li>
+            <li>Isbn: {{book.isbn}}</li>
+        </ul>
+    {% endif %}
+    <br>
+    <div>
+        <form action="{{url_for('book', book_id=book.id)}}" method="post">
+            <h1>Add review:</h1>
+            <h5 class="text-danger">{{err_mess}}</h5>
+            <br>
+            <textarea rows="4" cols="50" name="review_text" placeholder="Say something about this book!" required></textarea>
+            <br>
+            Average rate: <select name="avg_rate">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select> of 5
+            <button class="btn btn-primary">Submit review</button>
+        </form>
+    </div>
+    <br>
+    <div>
+        <h1>Reviews:</h1>
+        <ul>
+            {% for review in reviews %}
+                <hr>
+                <li>Name: {{review.username}}</li>
+                <li>Review: {{review.review_text}}</li>
+                <li>Avg_rate: {{review.avg_rate}} of 5</li>
+                <h4>Goodreads Review:</h4>
+                <ul>
+                    <li>rating_count: {{review.rating_num}}</li>
+                    <li>avg_rate: {{review.api_avg_rate}}</li>
+                </ul>
+                <hr>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
