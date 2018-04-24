@@ -5,21 +5,18 @@
 {% endblock %}
 
 {% block style %}
-    <style>
-
-        li {
-            font-size: 20px;
-        }
-
-        button {
-            margin-left: 20px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='details.css') }}?q=31">
 {% endblock %}
 
 
 {% block body %}
+    <nav>
+        <a href="{{ url_for('index') }}"><button class="btn btn-light home-btn">Home</button></a>
+        <a href="{{ url_for('logout') }}"><button class="btn btn-light logout-btn">Logout</button></a>
+        <a href="{{ url_for('search') }}"><button class="btn btn-light search-btn">Search</button></a>
+        <a class="username" href="{{ url_for('index') }}">{{username}}</a>
+    </nav>
+
     <div class="container">
         <h1 class="text-center">{{book.title}}</h1>
         <br>

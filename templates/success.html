@@ -1,11 +1,7 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    Success
-{% endblock %}
-
 {% block style %}
-    <meta http-equiv="refresh" content="1; url={{ url_for(url) }}" />
+    <meta http-equiv="refresh" content="{{sec}}; url={{ url_for(url) }}" />
     <style>
         body {
             text-align: center;

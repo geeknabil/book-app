@@ -24,7 +24,11 @@ db = scoped_session(sessionmaker(bind=engine))
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # if user not logging in
+    if session["user"] is None:
+        return render_template("index.html", logout=True)
+
+    return render_template("index.html", logout=False, username=session["user"]["username"])
     # # if user logging in
     # if session["user"]["user_id"] is None:
     # else:
@@ -49,7 +53,7 @@ def register():
             {"username": username, "email": email, "password": password})
             # save changes
             db.commit()
-            return render_template("success.html", mess="You have successfully registered!", url='login')
+            return render_template("success.html", mess="You have successfully registered!", url='login', sec=1)
         # if already exist return error mess
         else:
             return render_template("register.html", mess="Error, the user with this email already exist!")
@@ -72,9 +76,15 @@ def login():
         # store username and id for this user inside a session variable
         session["user"] = {"id": user.id, "username": user.username}
 
-        return render_template("success.html", mess="Thanks for logging in!", url='search')
+        return render_template("success.html", mess="Thanks for logging in!", url='search', sec=1)
 
     return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    # forget session for this user
+    session["user"] = None
+    return render_template("success.html", url='index', sec=0)
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
@@ -135,11 +145,11 @@ def book(book_id):
 
         # after making sure that user doesn't exist and submitted a review: render all reviews
         reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book_id}).fetchall()
-        return render_template("details.html", reviews=reviews, book=book, rating_num=rating_num, api_avg_rate=api_avg_rate)
+        return render_template("details.html", reviews=reviews, book=book, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["user"]["username"])
 
 
     # when user visit the page via GET request render details about the book, it's reviews (including it's reviews on Goodreads)
-    return render_template("details.html", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate)
+    return render_template("details.html", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["user"]["username"])
 
 @app.route("/api/<string:isbn>")
 def api(isbn):
