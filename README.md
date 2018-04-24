@@ -6,7 +6,6 @@ This file read about 5000 different book from books.csv file and import them in 
 
 # application.py
 This file includes all web application's logic btw handling user requests, calling Goodreads API and dealing with DB.
-There are routes that let users:
 1- register with validating user inputs.
 2- login also with validation and remembering users by storing their sessions.
 3- logout.
