@@ -7,15 +7,15 @@ This file read about 5000 different book from books.csv file and import them in 
 # application.py
 This file includes all web application's logic btw handling user requests, calling Goodreads API and dealing with DB.
 There are routes that let users:
-  1- register with validating user inputs
-  2- login also with validation and remembering users by storing their sessions
-  3- logout 
-  4- search for their favourite book with handling possible search queries and matching errors
-  5- see information about selected book
-  6- add review and only one review 
-  7- see added reviews submitted by other users
-  8- see book rate and it's average review from Goodreads
-  9- use site api including book isbn, title, author, pupublication year and reviews
+1- register with validating user inputs.
+2- login also with validation and remembering users by storing their sessions.
+3- logout.
+4- search for their favourite book with handling possible search queries and matching errors.
+5- see information about selected book.
+6- add review and only one review.
+7- see added reviews submitted by other users.
+8- see book rate and it's average review from Goodreads.
+9- use site api including book isbn, title, author, pupublication year and reviews.
 
 # Usage 
 You can either clone this repo and run it if you have flask server running
