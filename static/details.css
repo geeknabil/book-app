@@ -20,3 +20,13 @@ nav a {
   margin-right: 30px;
   margin-top: 10px;
 }
+/* end navbar style */
+
+.beside {
+  display: flex;
+}
+
+.to-right {
+  margin-left: 300px;
+  margin-top: 5px;
+}

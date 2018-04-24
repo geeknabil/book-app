@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='details.css') }}?q=31">
+    <link rel="stylesheet" href="{{ url_for('static', filename='details.css') }}?q=42">
 {% endblock %}
 
 
@@ -38,38 +38,39 @@
             <li>Avg_rate: {{api_avg_rate}} of 5</li>
         </ul>
         <hr>
-        <br>
-        <div>
-            <form action="{{url_for('book', book_id=book.id)}}" method="post">
-                <h1>Add review:</h1>
-                <h5 class="text-danger">{{err_mess}}</h5>
-                <br>
-                <textarea rows="4" cols="50" name="review_text" placeholder="Say something about this book!" required></textarea>
-                <br>
-                Average rate: <select name="avg_rate">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select> of 5
-                <button class="btn btn-primary">Submit review</button>
-            </form>
-        </div>
-        <br>
-        <div>
-            <h2>Reviews:</h2>
-            <ul>
-                {% for review in reviews %}
-                    <hr>
-                    <li>Name: {{review.username}}</li>
-                    <li>Review: {{review.review_text}}</li>
-                    <li>Avg_rate: {{review.avg_rate}} of 5</li>
-                    <hr>
-                {% else %}
-                    <h6>No reviews submitted!</h6>
-                {% endfor %}
-            </ul>
+        <div class="beside">
+            <div>
+                <form action="{{url_for('book', book_id=book.id)}}" method="post">
+                    <h1>Add a review:</h1>
+                    <h5 class="text-danger">{{err_mess}}</h5>
+                    <br>
+                    <textarea rows="4" cols="50" name="review_text" placeholder="Say something about this book!" required></textarea>
+                    <br>
+                    Average rate: <select name="avg_rate">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select> of 5
+                    <br>
+                    <button style="margin-top: 10px" class="btn btn-primary">Submit review</button>
+                </form>
+            </div>
+            <div class="to-right">
+                <h2>Users reviews:</h2>
+                <ul>
+                    {% for review in reviews %}
+                        <hr>
+                        <li>Name: {{review.username}}</li>
+                        <li>Review: {{review.review_text}}</li>
+                        <li>Avg_rate: {{review.avg_rate}} of 5</li>
+                        <hr>
+                    {% else %}
+                        <h6 class="text-info">No reviews submitted for this book try add a review!</h6>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 {% endblock %}
