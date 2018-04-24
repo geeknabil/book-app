@@ -1,7 +1,7 @@
 import os
 import requests
 
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -34,12 +34,12 @@ def index():
 def register():
     # if submitting the form
     if request.method == "POST":
-        # get user input
+        # get user inputs
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
 
-        # make sure user not exist
+        # make sure user not registered before
         user = db.execute("SELECT email FROM users WHERE email = :email",
         {"email": email}).fetchone()
 
@@ -59,10 +59,11 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    # make sure user logged in correctly
+    # get user inputs
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
+        # make sure user logged in correctly
         user = db.execute("SELECT * FROM users WHERE email = :email AND password = :password",
         {"email": email, "password": password}).fetchone()
         if user is None:
@@ -77,11 +78,12 @@ def login():
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
-    # render books that user asked
+    # get search input
     if request.method == "POST":
         book_query = request.form.get("search")
         book_query_like = '%' + book_query + '%'
 
+        # list books for user
         books = db.execute("SELECT * FROM books WHERE isbn LIKE :book_query_like OR title LIKE :book_query_like OR author LIKE :book_query_like",
         {"book_query_like": book_query_like}).fetchall()
 
@@ -91,11 +93,15 @@ def search():
 
 @app.route("/book/<int:book_id>", methods=["GET", "POST"])
 def book(book_id):
-    # first select book and it's reviews and make them global so we can render them in POST requests
+    # make sure book exist
     book = db.execute("SELECT * FROM books WHERE id = :book_id", {"book_id": book_id}).fetchone()
+    if book is None:
+        return render_template("details.html", no_book=True)
+
+    # select all reviews for this book
     reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book_id}).fetchall()
 
-    # call for Goodreads api
+    # call for Goodreads api for additional reviews
     res = requests.get("https://www.goodreads.com/book/review_counts.json",
     params={"key": "NDxVHeRzgVMWpplzuO3BWQ", "isbns": book.isbn})
 
@@ -107,33 +113,59 @@ def book(book_id):
     rating_num = data["books"][0]["work_ratings_count"]
     api_avg_rate = data["books"][0]["average_rating"]
 
-    # if user submit a review
+    # if user submitted a review
     if request.method == "POST":
         # take review inputs
         review_text = request.form.get("review_text")
         avg_rate = request.form.get("avg_rate")
 
-        # check if user submit any reviews before
+        # check if user submitted any reviews before
         user = db.execute("SELECT user_id FROM reviews WHERE user_id = :id AND book_id= :book_id",
         {"id": session['user']['id'], "book_id": book_id}).fetchone()
 
         # if not - Add this user and it's reviews for this book
         if user is None:
-            db.execute("INSERT INTO reviews (review_text, avg_rate, api_avg_rate, rating_num, book_id, user_id, username) VALUES (:review_text, :avg_rate, :api_avg_rate, :rating_num, :book_id, :user_id, :username)",
+            db.execute("INSERT INTO reviews (review_text, avg_rate, book_id, user_id, username) VALUES (:review_text, :avg_rate, :book_id, :user_id, :username)",
             {"review_text": review_text, "avg_rate": avg_rate, "book_id": book_id,
-            "user_id": session['user']['id'], "username": session['user']['username'],
-            "api_avg_rate": api_avg_rate, "rating_num": rating_num})
+            "user_id": session['user']['id'], "username": session['user']['username']})
             # save changes
             db.commit()
         else:
-            return render_template("details.html", err_mess="Error: You submitted a review before!", book=book, reviews=reviews)
+            return render_template("details.html", err_mess="Error: You submitted a review before!", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate)
 
-        # after making sure that the user doesn't exist and submitted a review: render all reviews
+        # after making sure that user doesn't exist and submitted a review: render all reviews
         reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book_id}).fetchall()
-        return render_template("details.html", reviews=reviews, book=book)
+        return render_template("details.html", reviews=reviews, book=book, rating_num=rating_num, api_avg_rate=api_avg_rate)
 
 
+    # when user visit the page via GET request render details about the book, it's reviews (including it's reviews on Goodreads)
+    return render_template("details.html", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate)
+
+@app.route("/api/<string:isbn>")
+def api(isbn):
+    # Make sure book with this isbn is exist
+    book = db.execute("SELECT id, title, author, year, isbn FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
     if book is None:
-        return render_template("details.html", no_book=True)
+        return jsonify({"error": "Invalid book isbn"}), 404
 
-    return render_template("details.html", book=book, reviews=reviews)
+    # call for Goodreads api
+    res = requests.get("https://www.goodreads.com/book/review_counts.json",
+    params={"key": "NDxVHeRzgVMWpplzuO3BWQ", "isbns": isbn})
+
+    if res.status_code != 200:
+        raise Exception("Error: API request unsuccessful.")
+
+    # extract api data
+    data = res.json()
+    rating_num = data["books"][0]["work_ratings_count"]
+    api_avg_rate = data["books"][0]["average_rating"]
+
+    # return info about the book
+    return jsonify({
+        "title": book.title,
+        "author": book.author,
+        "year": book.year,
+        "isbn": book.isbn,
+        "review_count": rating_num,
+        "average_score": float(api_avg_rate)
+    })
