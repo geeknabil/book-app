@@ -27,7 +27,7 @@ There are routes that let users:
 
 8- see book rate and it's average review from Goodreads.
 
-9- use site api including book isbn, title, author, pupublication year and reviews.
+9- use site api via (/api/isbn) will provide info for book isbn, title, author, pupublication year and reviews.
 
 
 # Usage 
