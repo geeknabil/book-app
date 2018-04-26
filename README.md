@@ -32,6 +32,9 @@ There are routes that let users:
 
 # Usage 
 You can either clone this repo and run it if you have flask server running
+
 or visit http://ide50-mohamed-nabil.cs50.io:8080/ with knowing that it's not always be running on cloud9 server
+
 if down, you can contact me personally to run the server. 
+
 I know this isn't a funny game so I will update this section when deploying to permanint server.
