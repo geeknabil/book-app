@@ -25,14 +25,10 @@ db = scoped_session(sessionmaker(bind=engine))
 @app.route("/")
 def index():
     # if user not logging in
-    if session["user"] is None:
+    if session.get('user_id') is None:
         return render_template("index.html", logout=True)
 
-    return render_template("index.html", logout=False, username=session["user"]["username"])
-    # # if user logging in
-    # if session["user"]["user_id"] is None:
-    # else:
-    #     return render_template("user.html")
+    return render_template("index.html", logout=False, username=session['username'])
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -74,22 +70,32 @@ def login():
             return render_template("login.html", mess="Error, either email or password not correct!", again="again")
 
         # store username and id for this user inside a session variable
-        session["user"] = {"id": user.id, "username": user.username}
+        session["username"] = user.username
+        session["user_id"] = user.id
 
         return render_template("success.html", mess="Thanks for logging in!", url='search', sec=1)
 
     return render_template("login.html")
 
-@app.route("/logout")
-def logout():
+@app.route("/logout/<string:to_page>")
+def logout(to_page):
     # forget session for this user
-    session["user"] = None
-    return render_template("success.html", url='index', sec=0)
+    session["user_id"] = None
+    if to_page == "index":
+        return render_template("index.html", logout=True)
+    elif to_page == "search":
+        return render_template("search.html", logout=True)
+    elif to_page == "book":
+        return render_template("details.html", logout=True)
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
-    # get search input
     if request.method == "POST":
+        # make sure that user is logging in
+        if session.get("user_id") is None:
+            return render_template("search.html", logout=True)
+
+        # get search input
         book_query = request.form.get("search")
         book_query_like = '%' + book_query + '%'
 
@@ -97,12 +103,19 @@ def search():
         books = db.execute("SELECT * FROM books WHERE isbn LIKE :book_query_like OR title LIKE :book_query_like OR author LIKE :book_query_like",
         {"book_query_like": book_query_like}).fetchall()
 
-        return render_template("search.html", username=session["user"]["username"], no_books= (len(books) == 0), books=books)
+        return render_template("search.html", username=session["username"], no_books= (len(books) == 0), books=books)
 
-    return render_template("search.html", username=session["user"]["username"])
+    # make sure that user is logging in
+    if session.get("user_id") is None:
+        return render_template("search.html", logout=True)
+    return render_template("search.html", logout=False, username=session["username"])
 
 @app.route("/book/<int:book_id>", methods=["GET", "POST"])
 def book(book_id):
+    # check if user logging in
+    if session.get('user_id') is None:
+        return render_template("details.html", logout=True)
+
     # make sure book exist
     book = db.execute("SELECT * FROM books WHERE id = :book_id", {"book_id": book_id}).fetchone()
     if book is None:
@@ -131,25 +144,25 @@ def book(book_id):
 
         # check if user submitted any reviews before
         user = db.execute("SELECT user_id FROM reviews WHERE user_id = :id AND book_id= :book_id",
-        {"id": session['user']['id'], "book_id": book_id}).fetchone()
+        {"id": session['user_id'], "book_id": book_id}).fetchone()
 
         # if not - Add this user and it's reviews for this book
         if user is None:
             db.execute("INSERT INTO reviews (review_text, avg_rate, book_id, user_id, username) VALUES (:review_text, :avg_rate, :book_id, :user_id, :username)",
             {"review_text": review_text, "avg_rate": avg_rate, "book_id": book_id,
-            "user_id": session['user']['id'], "username": session['user']['username']})
+            "user_id": session['user_id'], "username": session['username']})
             # save changes
             db.commit()
         else:
-            return render_template("details.html", err_mess="Error: You submitted a review before!", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate)
+            return render_template("details.html", err_mess="Error: You submitted a review before!", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["username"])
 
         # after making sure that user doesn't exist and submitted a review: render all reviews
         reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book_id}).fetchall()
-        return render_template("details.html", reviews=reviews, book=book, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["user"]["username"])
+        return render_template("details.html", reviews=reviews, book=book, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["username"])
 
 
     # when user visit the page via GET request render details about the book, it's reviews (including it's reviews on Goodreads)
-    return render_template("details.html", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["user"]["username"])
+    return render_template("details.html", book=book, reviews=reviews, rating_num=rating_num, api_avg_rate=api_avg_rate, username=session["username"])
 
 @app.route("/api/<string:isbn>")
 def api(isbn):
